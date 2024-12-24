@@ -268,7 +268,7 @@ export const deleteProductById = async (
   }
 };
 
-// Search products by a key (name or brand)
+// Search products by a key (name or brand etc)
 export const searchProductsByKey = async (
   req: Request,
   res: Response,
@@ -286,7 +286,7 @@ export const searchProductsByKey = async (
 
     const regex = new RegExp(key, "i");
     const productsList = await Products.find({
-      $or: [{ name: regex }, { brand: regex }],
+      $or: [{ name: regex }, { brand: regex }, { seller: regex } , { product_description: regex }],
     });
 
     if (productsList.length === 0) {
