@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Products from "../models/productModel";
+const { check, validationResult } = require("express-validator");
 
 const handleError = (
   res: Response,
@@ -61,13 +62,12 @@ export const createProduct = async (
 //   }
 // };
 
-
 interface ProductResponse {
   status: string;
-  successCount: number;  
-  failedCount: number;   
+  successCount: number;
+  failedCount: number;
   successInserts: any[];
-  failedInserts?: { product: any; error: string }[]; 
+  failedInserts?: { product: any; error: string }[];
 }
 
 export const createMultipleProducts = async (
@@ -90,14 +90,34 @@ export const createMultipleProducts = async (
     const failedInserts: { product: any; error: string }[] = [];
 
     for (const product of products) {
+      const errors = validationResult({ body: product });
+      if (!errors.isEmpty()) {
+        failedInserts.push({
+          product,
+          error: errors.array().map((err: { msg: string }) => err.msg).join(", "),
+        });
+        continue; 
+      }
+
+      const existingProduct = await Products.findOne({
+        name: product.name,
+        product_description: product.product_description,
+      });
+
+      if (existingProduct) {
+        failedInserts.push({
+          product,
+          error: "Product with this name and description already exists.",
+        });
+        continue;
+      }
+
       try {
         const createdProduct = await Products.create(product);
         createdProducts.push(createdProduct);
       } catch (err) {
-        
         const errorMessage =
           err instanceof Error ? err.message : "Unknown error";
-
         failedInserts.push({
           product,
           error: errorMessage,
@@ -105,28 +125,27 @@ export const createMultipleProducts = async (
       }
     }
 
-    
     const response: ProductResponse = {
       status: "success",
-      successCount: createdProducts.length, 
-      failedCount: failedInserts.length,     
+      successCount: createdProducts.length,
+      failedCount: failedInserts.length,
       successInserts: createdProducts,
     };
 
-    
     if (failedInserts.length > 0) {
       response.failedInserts = failedInserts;
     }
 
     res.status(201).json(response);
   } catch (err) {
-    
-
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    handleError(res, `Failed to create multiple products: ${errorMessage}`, 400, err);
+      res.status(400).json({
+      status: "fail",
+      message: `Failed to create multiple products: ${errorMessage}`,
+    });
+    return;
   }
 };
-
 
 
 
