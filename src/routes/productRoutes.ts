@@ -10,7 +10,7 @@ router.post("/CreateMultiple", createMultipleProducts);
 router.get("/GetAllProducts", getAllProducts);
 router.get("/GetProductById/:id", getProductById);
 router.get("/SearchProduct/:key", searchProductsByKey);
-router.patch("/UpdateProductById/:id", updateProductById);
+router.patch("/UpdateProductById/:id",validateProduct, updateProductById);
 router.delete("/DeleteProductById/:id", deleteProductById);
 
 export default router;
