@@ -16,7 +16,7 @@ const handleError = (
   });
 };
 
-// Create a one product
+// Create a product
 export const createProduct = async (
   req: Request,
   res: Response,
@@ -296,7 +296,6 @@ export const deleteMultipleProducts = async (
   try {
     const { ids } = req.body;
 
-    // Validate input
     if (!Array.isArray(ids) || ids.length === 0) {
       res.status(400).json({
         status: "fail",
@@ -308,7 +307,6 @@ export const deleteMultipleProducts = async (
     const deletedProducts: any[] = [];
     const failedProducts: { id: string; error: string }[] = [];
 
-    // Process each ID individually
     for (const id of ids) {
       try {
         const product = await Products.findByIdAndDelete(id);
@@ -322,10 +320,10 @@ export const deleteMultipleProducts = async (
       }
     }
 
-    // Prepare the response
     res.status(200).json({
       success: true,
-      message: `${deletedProducts.length} product(s) successfully deleted. ${failedProducts.length} product(s) failed to delete.`,
+      message: `${deletedProducts.length} product(s) successfully deleted. 
+                ${failedProducts.length} product(s) failed to delete.`,
       deletedProductsCount: deletedProducts.length,
       failedProductsCount: failedProducts.length,
       deletedProducts,
