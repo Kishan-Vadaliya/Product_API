@@ -157,7 +157,7 @@ export const getAllProducts = async (
   try {
     const {
       page = 1,
-      limit=188,
+      limit=50,
       sort = "createdAt",
       order = "asc",
       name,
