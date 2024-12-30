@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Products from "../models/productModel";
-const {validationResult } = require("express-validator");
+const { validationResult } = require("express-validator");
 
 const handleError = (
   res: Response,
@@ -32,7 +32,6 @@ export const createProduct = async (
     handleError(res, "Failed to create product", 400, err);
   }
 };
-
 
 // Create multiple products
 // export const createMultipleProducts = async (
@@ -79,7 +78,7 @@ export const createMultipleProducts = async (
     const products = req.body;
 
     if (!Array.isArray(products)) {
-        res.status(400).json({
+      res.status(400).json({
         status: "fail",
         message: "Request body must be an array of products.",
       });
@@ -94,9 +93,12 @@ export const createMultipleProducts = async (
       if (!errors.isEmpty()) {
         failedInserts.push({
           product,
-          error: errors.array().map((err: { msg: string }) => err.msg).join(", "),
+          error: errors
+            .array()
+            .map((err: { msg: string }) => err.msg)
+            .join(", "),
         });
-        continue; 
+        continue;
       }
 
       const existingProduct = await Products.findOne({
@@ -139,15 +141,13 @@ export const createMultipleProducts = async (
     res.status(201).json(response);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      res.status(400).json({
+    res.status(400).json({
       status: "fail",
       message: `Failed to create multiple products: ${errorMessage}`,
     });
     return;
   }
 };
-
-
 
 export const getAllProducts = async (
   req: Request,
@@ -157,7 +157,7 @@ export const getAllProducts = async (
   try {
     const {
       page = 1,
-      limit=50,
+      limit = 25,
       sort = "createdAt",
       order = "asc",
       name,
@@ -200,7 +200,7 @@ export const getAllProducts = async (
         currentPage: pageNumber,
         totalPages: Math.ceil(totalProducts / limitNumber),
         limit: limitNumber,
-        result : productsList.length,
+        result: productsList.length,
       },
       data: productsList,
     });
@@ -298,7 +298,7 @@ export const deleteMultipleProducts = async (
 
     // Validate input
     if (!Array.isArray(ids) || ids.length === 0) {
-        res.status(400).json({
+      res.status(400).json({
         status: "fail",
         message: "Request body must contain a non-empty array of product IDs.",
       });
@@ -358,7 +358,12 @@ export const searchProductsByKey = async (
 
     const regex = new RegExp(key, "i");
     const productsList = await Products.find({
-      $or: [{ name: regex }, { brand: regex }, { seller: regex } , { product_description: regex }],
+      $or: [
+        { name: regex },
+        { brand: regex },
+        { seller: regex },
+        { product_description: regex },
+      ],
     });
 
     if (productsList.length === 0) {
@@ -377,8 +382,6 @@ export const searchProductsByKey = async (
     handleError(res, "Failed to search products", 500, err);
   }
 };
-
-
 
 export default {
   createProduct,

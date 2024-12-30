@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document} from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IProduct extends Document {
   name: string;
@@ -64,8 +64,6 @@ const productSchema: Schema<IProduct> = new Schema(
   },
   { timestamps: true }
 );
-
-
 
 // // Middleware to handle duplicate key errors gracefully
 // productSchema.post<IProduct>("save", (error: any, doc: IProduct, next: (err?: CallbackError) => void) => {

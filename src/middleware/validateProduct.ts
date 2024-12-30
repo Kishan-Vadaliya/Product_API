@@ -1,4 +1,4 @@
-import Joi from "joi"; 
+import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
 import Product from "../models/productModel";
 
@@ -32,40 +32,30 @@ const rejectExtraFields = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const productSchema = Joi.object({
-  name: Joi.string().trim().required().messages({
-    "string.empty": "Product name is required.",
-  }),
-
-  product_description: Joi.string()
+  name: Joi.string()
     .trim()
-    .min(10)
     .required()
-    .messages({
-      "string.empty": "Product description is required.",
-      "string.min": "Product description must be at least 10 characters long.",
-    }),
+    .messages({ "string.empty": "Product name is required." }),
+
+  product_description: Joi.string().trim().min(10).required().messages({
+    "string.empty": "Product description is required.",
+    "string.min": "Product description must be at least 10 characters long.",
+  }),
 
   brand: Joi.string().trim().required().messages({
     "string.empty": "Product brand is required.",
   }),
 
-  price: Joi.number()
-    .greater(0)
-    .required()
-    .messages({
-      "number.base": "Price must be a number.",
-      "number.greater": "Price must be greater than 0.",
-    }),
+  price: Joi.number().greater(0).required().messages({
+    "number.base": "Price must be a number.",
+    "number.greater": "Price must be greater than 0.",
+  }),
 
-  ratings: Joi.number()
-    .min(0)
-    .max(5)
-    .required()
-    .messages({
-      "number.base": "Ratings must be a number.",
-      "number.min": "Ratings must be at least 0.",
-      "number.max": "Ratings must not exceed 5.",
-    }),
+  ratings: Joi.number().min(0).max(5).required().messages({
+    "number.base": "Ratings must be a number.",
+    "number.min": "Ratings must be at least 0.",
+    "number.max": "Ratings must not exceed 5.",
+  }),
 
   category: Joi.string().trim().optional().messages({
     "string.base": "Category must be a string.",
@@ -87,7 +77,7 @@ export const validateProduct = async (
     const { error } = productSchema.validate(req.body, { abortEarly: false });
 
     if (error) {
-       res.status(400).json({
+      res.status(400).json({
         success: false,
         errors: error.details.map((detail) => ({
           field: detail.context?.key || "unknown",
@@ -98,21 +88,26 @@ export const validateProduct = async (
     }
 
     const { name, product_description } = req.body;
-    const existingProduct = await Product.findOne({ name, product_description });
+    const existingProduct = await Product.findOne({
+      name,
+      product_description,
+    });
 
     if (existingProduct) {
-        res.status(400).json({
+      res.status(400).json({
         success: false,
-        errors: [{
-          field: "name",
-          message: "Product with this name and description already exists."
-        }],
+        errors: [
+          {
+            field: "name",
+            message: "Product with this name and description already exists.",
+          },
+        ],
       });
       return;
     }
 
     next();
-  } catch (err:any ) {
+  } catch (err: any) {
     res.status(500).json({
       success: false,
       message: "Internal server error.",
