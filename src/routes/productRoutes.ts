@@ -18,12 +18,7 @@ import {
 
 const router = express.Router();
 
-router.post(
-  "/CreateProduct",
-  validateProduct,
-  handleValidationErrors,
-  createProduct
-);
+router.post("/CreateProduct",validateProduct,handleValidationErrors,createProduct);
 router.post("/CreateMultiple", createMultipleProducts);
 router.get("/GetAllProducts", getAllProducts);
 router.get("/GetProductById/:id", getProductById);
