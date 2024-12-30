@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Products from "../models/productModel";
-const { check, validationResult } = require("express-validator");
+const {validationResult } = require("express-validator");
 
 const handleError = (
   res: Response,
@@ -157,7 +157,7 @@ export const getAllProducts = async (
   try {
     const {
       page = 1,
-      limit=25,
+      limit=188,
       sort = "createdAt",
       order = "asc",
       name,
@@ -286,6 +286,59 @@ export const deleteProductById = async (
     handleError(res, "Failed to delete product", 500, err);
   }
 };
+// Delete Multiple product by Id
+
+export const deleteMultipleProducts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { ids } = req.body;
+
+    // Validate input
+    if (!Array.isArray(ids) || ids.length === 0) {
+        res.status(400).json({
+        status: "fail",
+        message: "Request body must contain a non-empty array of product IDs.",
+      });
+      return;
+    }
+
+    const deletedProducts: any[] = [];
+    const failedProducts: { id: string; error: string }[] = [];
+
+    // Process each ID individually
+    for (const id of ids) {
+      try {
+        const product = await Products.findByIdAndDelete(id);
+        if (product) {
+          deletedProducts.push(product); // Store full product details
+        } else {
+          failedProducts.push({ id, error: "Product not found" });
+        }
+      } catch (err: any) {
+        failedProducts.push({ id, error: err.message });
+      }
+    }
+
+    // Prepare the response
+    res.status(200).json({
+      success: true,
+      message: `${deletedProducts.length} product(s) successfully deleted. ${failedProducts.length} product(s) failed to delete.`,
+      deletedProductsCount: deletedProducts.length,
+      failedProductsCount: failedProducts.length,
+      deletedProducts,
+      failedProducts,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while deleting products.",
+      error: error.message,
+    });
+  }
+};
 
 // Search products by a key (name or brand etc)
 export const searchProductsByKey = async (
@@ -324,6 +377,8 @@ export const searchProductsByKey = async (
     handleError(res, "Failed to search products", 500, err);
   }
 };
+
+
 
 export default {
   createProduct,
